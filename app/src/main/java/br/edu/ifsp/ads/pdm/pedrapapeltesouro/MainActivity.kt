@@ -18,6 +18,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: ActivityMainBinding
     private lateinit var configActivityLauncher: ActivityResultLauncher<Intent>
 
+    private val appSettingsController: ConfigController by lazy {
+        ConfigController(this)
+    }
+
+    private val appSettings: Config by lazy {
+        appSettingsController.load()
+    }
+
+    var configSalve: Config = Config(2)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -31,30 +41,34 @@ class MainActivity : AppCompatActivity() {
                     if (resultado.data != null) {
                         val configSalve: Config? =
                             resultado.data?.getParcelableExtra(Intent.EXTRA_USER)
-                        if (configSalve?.numeroJogadores != -1) { // insert no banco???
+                        if (configSalve?.id != 1) {
+                            if (configSalve != null) {
+                                appSettingsController.insert(configSalve)
+                            }
 
-                        } else {
-                            //UPDATE no banco???
-                        }
-                        activityMainBinding.btnPedra.setOnClickListener {
-                            jogo(0, configSalve?.numeroJogadores)
-                        }
-
-                        activityMainBinding.btnPapel.setOnClickListener {
-                            jogo(1, configSalve?.numeroJogadores)
+                        } else  {
+                            if (configSalve != null) {
+                                appSettingsController.update(configSalve)
+                            }
                         }
 
-                        activityMainBinding.btnTesoura.setOnClickListener {
-                            jogo(2, configSalve?.numeroJogadores)
-                        }
                     }
-
                 }
                 activityMainBinding.configBt.setOnClickListener {
                     val configIntent = Intent(this, ConfigActivity::class.java)
                     configActivityLauncher.launch(configIntent)
                 }
+            }
+            activityMainBinding.btnPedra.setOnClickListener {
+                jogo(0, configSalve?.numeroJogadores)
+            }
 
+            activityMainBinding.btnPapel.setOnClickListener {
+                jogo(1, configSalve?.numeroJogadores)
+            }
+
+            activityMainBinding.btnTesoura.setOnClickListener {
+                jogo(2, configSalve?.numeroJogadores)
             }
     }
         override fun onCreateOptionsMenu(menu: Menu?): Boolean {
